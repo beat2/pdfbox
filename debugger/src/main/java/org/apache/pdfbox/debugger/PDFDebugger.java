@@ -45,8 +45,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import javax.imageio.spi.IIORegistry;
 
+import javax.imageio.spi.IIORegistry;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Sides;
@@ -70,6 +70,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
+
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSBoolean;
@@ -933,6 +934,16 @@ public class PDFDebugger extends JFrame
         return false;
     }
 
+    private boolean isSignatureContentsEntry(Object selectedNode)
+    {
+        if (selectedNode instanceof MapEntry)
+        {
+            MapEntry entry = (MapEntry) selectedNode;
+            return entry.getKey().equals(COSName.CONTENTS);
+        }
+        return false;
+    }
+
     private boolean isCIDFont(COSDictionary dic)
     {
         return dic.containsKey(COSName.SUBTYPE) &&
@@ -1086,7 +1097,8 @@ public class PDFDebugger extends JFrame
     private void showString(Object selectedNode)
     {
         COSString string = (COSString)getUnderneathObject(selectedNode);
-        replaceRightComponent(new StringPane(string).getPane());
+        replaceRightComponent(
+                new StringPane(string, isSignatureContentsEntry(selectedNode)).getPane());
     }
 
     private COSName getNodeKey(Object selectedNode)

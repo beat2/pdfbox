@@ -18,11 +18,17 @@
 package org.apache.pdfbox.debugger.stringpane;
 
 import java.awt.Dimension;
+
 import javax.swing.JComponent;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
+
 import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.debugger.hexviewer.HexView;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.util.ASN1Dump;
 
 /**
  * @author Khyrul Bashar
@@ -33,12 +39,14 @@ public class StringPane
     private static final String HEX_TAB = "Hex view";
 
     private final JTabbedPane tabbedPane;
+    private boolean isInSignatureDictionary;
 
-    public StringPane(COSString cosString)
+    public StringPane(COSString cosString, boolean isInSignatureDictionary)
     {
+        this.isInSignatureDictionary = isInSignatureDictionary;
         tabbedPane = new JTabbedPane();
         tabbedPane.setPreferredSize(new Dimension(300, 500));
-        tabbedPane.addTab(TEXT_TAB, createTextView(cosString));
+        tabbedPane.addTab(TEXT_TAB, new JScrollPane(createTextView(cosString)));
         tabbedPane.addTab(HEX_TAB, createHexView(cosString));
     }
 
@@ -64,11 +72,29 @@ public class StringPane
         {
             if (Character.isISOControl(c))
             {
-                text = "<" + cosString.toHexString() + ">";
-                break;
+                // TODO maybe build Asn1View parallel to Hex / StringView?
+                if (isInSignatureDictionary)
+                {
+                    ASN1StreamParser parser = new ASN1StreamParser(cosString.getBytes());
+                    try
+                    {
+                        ASN1Encodable encodable = parser.readObject();
+                        text = ASN1Dump.dumpAsString(encodable, true);
+                    }
+                    catch (Exception e)
+                    {
+                        text = "<" + cosString.toHexString() + ">";
+                    }
+
+                    break;
+                }
+                else
+                {
+                    text = "<" + cosString.toHexString() + ">";
+                }
             }
         }
-        return  "" + text;
+        return "" + text;
     }
 
     public JTabbedPane getPane()
