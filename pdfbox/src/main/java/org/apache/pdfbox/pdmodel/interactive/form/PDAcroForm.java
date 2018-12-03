@@ -101,36 +101,33 @@ public final class PDAcroForm implements COSObjectable
      * Adobe Reader / Adobe Acrobat
      *  
      */
-    private void verifyOrCreateDefaults()
-    {
-        final String adobeDefaultAppearanceString = "/Helv 0 Tf 0 g ";
+    private void verifyOrCreateDefaults() {
+	final String adobeDefaultAppearanceString = "/Helv 0 Tf 0 g ";
 
-        // DA entry is required
-        if (getDefaultAppearance().length() == 0)
-        {
-            setDefaultAppearance(adobeDefaultAppearanceString);
-        }
+	// DA entry is required
+	if (getDefaultAppearance().length() == 0) {
+	    setDefaultAppearance(adobeDefaultAppearanceString);
+	}
 
-        // DR entry is required
-        PDResources defaultResources = getDefaultResources();
-        if (defaultResources == null)
-        {
-            defaultResources = new PDResources();
-            setDefaultResources(defaultResources);
-        }
+	// DR entry is required
+	PDResources defaultResources = getDefaultResources();
+	if (defaultResources == null) {
+	    defaultResources = new PDResources();
+	    setDefaultResources(defaultResources);
+	}
 
-        // Adobe Acrobat uses Helvetica as a default font and 
-        // stores that under the name '/Helv' in the resources dictionary
-        // Zapf Dingbats is included per default for check boxes and 
-        // radio buttons as /ZaDb.
-        if (!defaultResources.getCOSObject().containsKey("Helv"))
-        {
-            defaultResources.put(COSName.getPDFName("Helv"), PDType1Font.HELVETICA);
-        }
-        if (!defaultResources.getCOSObject().containsKey("ZaDb"))
-        {
-            defaultResources.put(COSName.getPDFName("ZaDb"), PDType1Font.ZAPF_DINGBATS);
-        }
+	// Adobe Acrobat uses Helvetica as a default font and
+	// stores that under the name '/Helv' in the resources dictionary
+	// Zapf Dingbats is included per default for check boxes and
+	// radio buttons as /ZaDb.
+	COSDictionary fontDict = (COSDictionary) defaultResources.getCOSObject().getDictionaryObject(COSName.FONT);
+
+	if (fontDict == null || !fontDict.containsKey("Helv")) {
+	    defaultResources.put(COSName.getPDFName("Helv"), PDType1Font.HELVETICA);
+	}
+	if (fontDict == null || !fontDict.containsKey("ZaDb")) {
+	    defaultResources.put(COSName.getPDFName("ZaDb"), PDType1Font.ZAPF_DINGBATS);
+	}
     }
     
 
